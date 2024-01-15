@@ -33,7 +33,7 @@ def main():
     args = parser.parse_args()
 
     # Download and load checkpoints
-    download_models(CACHE_DIR_HAMER)
+    #download_models(CACHE_DIR_HAMER)
     model, model_cfg = load_hamer(args.checkpoint)
 
     # Setup HaMeR model
@@ -47,7 +47,10 @@ def main():
     import hamer
     cfg_path = Path(hamer.__file__).parent/'configs'/'cascade_mask_rcnn_vitdet_h_75ep.py'
     detectron2_cfg = LazyConfig.load(str(cfg_path))
-    detectron2_cfg.train.init_checkpoint = "https://dl.fbaipublicfiles.com/detectron2/ViTDet/COCO/cascade_mask_rcnn_vitdet_h/f328730692/model_final_f05665.pkl"
+    ## Setting init_checkpoint to this URL downloads .pkl file to AFS home dir, which will not work becuase it will exceed disk quota. Instead, download
+    # .pkl file to desired directory and set init_checkpoint to this path
+    #detectron2_cfg.train.init_checkpoint = "https://dl.fbaipublicfiles.com/detectron2/ViTDet/COCO/cascade_mask_rcnn_vitdet_h/f328730692/model_final_f05665.pkl"
+    detectron2_cfg.train.init_checkpoint = "/juno/u/clairech/hamer/_DATA/detectron_ckpts/model_final_f05665.pkl"
     for i in range(3):
         detectron2_cfg.model.roi_heads.box_predictors[i].test_score_thresh = 0.25
     detector = DefaultPredictor_Lazy(detectron2_cfg)
@@ -98,7 +101,7 @@ def main():
                 bbox = [keyp[valid,0].min(), keyp[valid,1].min(), keyp[valid,0].max(), keyp[valid,1].max()]
                 bboxes.append(bbox)
                 is_right.append(0)
-            keyp = right_hand_keyp
+            keyp = right_hand_keyp # [21,3], pixel coords
             valid = keyp[:,2] > 0.5
             if sum(valid) > 3:
                 bbox = [keyp[valid,0].min(), keyp[valid,1].min(), keyp[valid,0].max(), keyp[valid,1].max()]
@@ -107,6 +110,8 @@ def main():
 
         if len(bboxes) == 0:
             continue
+        print(keyp)
+        print(keyp.shape)
 
         boxes = np.stack(bboxes)
         right = np.stack(is_right)
@@ -124,6 +129,8 @@ def main():
             with torch.no_grad():
                 out = model(batch)
 
+            #print(out["pred_keypoints_3d"]) # [B, 21, 3]
+
             multiplier = (2*batch['right']-1)
             pred_cam = out['pred_cam']
             pred_cam[:,1] = multiplier*pred_cam[:,1]
@@ -136,6 +143,7 @@ def main():
 
             # Render the result
             batch_size = batch['img'].shape[0]
+            print(out["pred_keypoints_3d"].shape) # [B, 21, 3]
             for n in range(batch_size):
                 # Get filename from path img_path
                 img_fn, _ = os.path.splitext(os.path.basename(img_path))
@@ -165,7 +173,7 @@ def main():
                 cv2.imwrite(os.path.join(args.out_folder, f'{img_fn}_{person_id}.png'), 255*final_img[:, :, ::-1])
 
                 # Add all verts and cams to list
-                verts = out['pred_vertices'][n].detach().cpu().numpy()
+                verts = out['pred_vertices'][n].detach().cpu().numpy() # [778, 3] verts of mesh
                 is_right = batch['right'][n].cpu().numpy()
                 verts[:,0] = (2*is_right-1)*verts[:,0]
                 cam_t = pred_cam_t_full[n]
