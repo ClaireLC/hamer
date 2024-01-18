@@ -125,19 +125,24 @@ class SkeletonRenderer:
 
     def draw_keypoints(self,
                  pred_keypoints_3d: torch.Tensor,
-                 images: Optional[np.array] = None,
-                 camera_translation: Optional[torch.Tensor] = None) -> np.array:
+                 images: np.array,
+                 camera_translation: Optional[torch.Tensor] = None,
+                 focal_length: Optional[torch.Tensor] = None) -> np.array:
         """
         Render batch of 3D keypoints.
         Args:
             pred_keypoints_3d (torch.Tensor): Tensor of shape (B, N, 3) containing a batch of predicted 3D keypoints.
             images (torch.Tensor): Tensor of shape (B, H, W, 3) containing images with values in the [0,255] range.
             camera_translation (torch.Tensor): Tensor of shape (B, 3) containing the camera translation.
+            focal_length (torch.Tensor): Tensor of shape (1, 2) containtining camera focal length
         Returns:
             np.array : Image with the following layout. Each row contains the a) input image,
                                                                               b) 1, ... , d_S) image with projected predicted 3D keypoints,
                                                                               c) gt 3D keypoints rendered from a side view
         """
+
+        IMG_H = images.shape[1]
+        IMG_W = images.shape[2]
         batch_size = pred_keypoints_3d.shape[0]
         pred_keypoints_3d = pred_keypoints_3d.clone().cpu().float()
 
@@ -152,8 +157,11 @@ class SkeletonRenderer:
 
         if images is None:
             images = np.zeros((batch_size, self.cfg.MODEL.IMAGE_SIZE, self.cfg.MODEL.IMAGE_SIZE, 3))
-        focal_length = torch.tensor([self.cfg.EXTRA.FOCAL_LENGTH, self.cfg.EXTRA.FOCAL_LENGTH]).reshape(1, 2)
-        camera_center = torch.tensor([self.cfg.MODEL.IMAGE_SIZE, self.cfg.MODEL.IMAGE_SIZE], dtype=torch.float).reshape(1, 2) / 2.
+
+        if focal_length is None:
+            focal_length = torch.tensor([self.cfg.EXTRA.FOCAL_LENGTH, self.cfg.EXTRA.FOCAL_LENGTH]).reshape(1, 2)
+
+        camera_center = torch.tensor([IMG_W, IMG_H], dtype=torch.float).reshape(1, 2) / 2.
         pred_keypoints_3d_proj = perspective_projection(pred_keypoints_3d.reshape(batch_size, -1, 3), rotation=rotation.repeat(batch_size, 1, 1), translation=camera_translation.reshape(batch_size, -1), focal_length=focal_length.repeat(batch_size, 1), camera_center=camera_center.repeat(batch_size, 1)).reshape(batch_size, -1, 2)
         pred_keypoints_3d_proj = torch.cat([pred_keypoints_3d_proj, keypoints_to_render.reshape(batch_size, -1, 1)], dim=-1).cpu().numpy()
         rows = []
@@ -165,7 +173,7 @@ class SkeletonRenderer:
         pred_keypoints_3d_proj_side = torch.cat([pred_keypoints_3d_proj_side, keypoints_to_render.reshape(batch_size, -1, 1)], dim=-1).cpu().numpy()
         for i in range(batch_size):
             img = images[i]
-            side_img = np.zeros((self.cfg.MODEL.IMAGE_SIZE, self.cfg.MODEL.IMAGE_SIZE, 3)) # all-black 
+            side_img = np.zeros((IMG_H, IMG_W, 3)) # all-black 
 
             original_img = img / 255.
 
@@ -191,8 +199,8 @@ class SkeletonRenderer:
         img = np.concatenate(rows, axis=0)
 
         # Add white border between images
-        img[:, ::self.cfg.MODEL.IMAGE_SIZE, :] = 1.0
-        img[::self.cfg.MODEL.IMAGE_SIZE, :, :] = 1.0
+        img[:, ::IMG_W, :] = 1.0
+        img[::IMG_H, :, :] = 1.0
         img[-1, :, :] = 1.0
         img[:, -1, :] = 1.0
 
