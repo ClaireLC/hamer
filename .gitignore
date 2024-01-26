@@ -1,3 +1,11 @@
+# Additionaly
+*.png
+*.jpg
+*.obj
+*.npz
+*.zip
+
+
 # Specific
 /logs*/
 /results/

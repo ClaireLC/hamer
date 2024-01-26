@@ -1,4 +1,49 @@
 # HaMeR: Hand Mesh Recovery
+* This is a fork of the [HaMeR](https://github.com/geopavlakos/hamer) and mainly used for utilizing the 3D info (pose and mesh) for our unique purpose tracking.
+
+## Recomend installtion procedure
+```bash
+conda create -n LFD_10 python=3.10 -y
+conda activare LFD_10
+
+### ========== OUTSIDE OF Hamer repo ========== ###
+conda install -y pytorch==2.0.0 torchvision==0.15.0 torchaudio==2.0.0 pytorch-cuda=11.8 -c pytorch -c nvidia
+conda install mamba -c conda-forge
+mamba install -c conda-forge opencv
+pip install opencv-python opencv-python-headless
+
+### ========== INSIDE OF VISION_MODULE FOLDER ========== ###
+# git clone --recursive git@github.com:geopavlakos/hamer.git
+git clone --recursive git@github.com:ClaireLC/hamer.git
+
+cd hamer
+
+pip install -e .[all]
+pip install -v -e third-party/ViTPose
+
+
+### ========== DOWNLOAD models and datas for Hamer ========== ###
+bash fetch_demo_data.sh
+
+
+# models that require sign up on the MANO webpage
+gdown 17d50j7z9V_1RbmkpOLbznBwPt34C39KG
+unzip mano_v1_2.zip -d ./unziped
+mv ./unziped/mano_v1_2/models/*.pkl _DATA/data/mano/
+rm -r unziped
+# rm -r mano_v1_2
+
+
+### ========== Demo run ========== ###
+mkdir demo_out
+python demo.py --img_folder example_data --out_folder demo_out --batch_size=48 --side_view --save_mesh --full_frame
+```
+
+
+
+
+
+# Origional README starts here
 Code repository for the paper:
 **Reconstructing Hands in 3D with Transformers**
 
