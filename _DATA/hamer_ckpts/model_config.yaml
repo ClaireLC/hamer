@@ -49,11 +49,11 @@ extras:
   print_config: true
 exp_name: hamer
 MANO:
-  DATA_DIR: /juno/u/clairech/hamer/_DATA/data/
-  MODEL_PATH: /juno/u/clairech/hamer/_DATA/data/mano
+  DATA_DIR: _DATA/data/
+  MODEL_PATH: data/mano
   GENDER: neutral
   NUM_HAND_JOINTS: 15
-  MEAN_PARAMS: /juno/u/clairech/hamer/_DATA/data/mano_mean_params.npz
+  MEAN_PARAMS: data/mano_mean_params.npz
   CREATE_BODY_POSE: false
 EXTRA:
   FOCAL_LENGTH: 5000
