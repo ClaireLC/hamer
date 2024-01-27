@@ -25,14 +25,18 @@ pip install -v -e third-party/ViTPose
 ### ========== DOWNLOAD models and datas for Hamer ========== ###
 bash fetch_demo_data.sh
 
-
-# models that require sign up on the MANO webpage
-gdown 17d50j7z9V_1RbmkpOLbznBwPt34C39KG
+# [HaMeR] checkpoints
+gdown 17d50j7z9V_1RbmkpOLbznBwPt34C39KG # require sign up on the MANO webpage
 unzip mano_v1_2.zip -d ./unziped
 mv ./unziped/mano_v1_2/models/*.pkl _DATA/data/mano/
 rm -r unziped
 # rm -r mano_v1_2
 
+# [Detectron2] checkpoints
+mkdir -p ./_DATA/detectron_ckpts/
+cd ./_DATA/detectron_ckpts/
+wget https://dl.fbaipublicfiles.com/detectron2/ViTDet/COCO/cascade_mask_rcnn_vitdet_h/f328730692/model_final_f05665.pkl
+cd ../..
 
 ### ========== Demo run ========== ###
 mkdir demo_out

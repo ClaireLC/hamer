@@ -8,21 +8,8 @@ import torch.nn as nn
 
 from mmpose.apis import inference_top_down_pose_model, init_pose_model, process_mmdet_results, vis_pose_result
 
+from hamer.utils import get_parent_folder_of_package
 
-def get_parent_folder_of_package(package_name):
-    # Import the package
-    package = __import__(package_name)
-
-    # Get the absolute path of the imported package
-    package_path = os.path.abspath(package.__file__)
-
-    # Get the directory of the package
-    package_dir = os.path.dirname(package_path)
-
-    # Get the parent directory
-    parent_dir = os.path.dirname(package_dir)
-
-    return parent_dir
 
 os.environ["PYOPENGL_PLATFORM"] = "egl"
 

@@ -7,7 +7,7 @@ import numpy as np
 
 from hamer.configs import CACHE_DIR_HAMER
 from hamer.models import HAMER, download_models, load_hamer, DEFAULT_CHECKPOINT
-from hamer.utils import recursive_to
+from hamer.utils import recursive_to, get_parent_folder_of_package
 from hamer.datasets.vitdet_dataset import ViTDetDataset, DEFAULT_MEAN, DEFAULT_STD
 from hamer.utils.renderer import Renderer, cam_crop_to_full
 
@@ -50,7 +50,10 @@ def main():
     ## Setting init_checkpoint to this URL downloads .pkl file to AFS home dir, which will not work becuase it will exceed disk quota. Instead, download
     # .pkl file to desired directory and set init_checkpoint to this path
     #detectron2_cfg.train.init_checkpoint = "https://dl.fbaipublicfiles.com/detectron2/ViTDet/COCO/cascade_mask_rcnn_vitdet_h/f328730692/model_final_f05665.pkl"
-    detectron2_cfg.train.init_checkpoint = "/juno/u/clairech/hamer/_DATA/detectron_ckpts/model_final_f05665.pkl"
+    ROOT_DIR = get_parent_folder_of_package('hamer')    # auto detect the root directory of the project
+    detectron2_cfg.train.init_checkpoint = os.path.join(ROOT_DIR, "_DATA/detectron_ckpts/model_final_f05665.pkl")
+    print(f'Loading detectron2 model from {detectron2_cfg.train.init_checkpoint}')
+
     for i in range(3):
         detectron2_cfg.model.roi_heads.box_predictors[i].test_score_thresh = 0.25
     detector = DefaultPredictor_Lazy(detectron2_cfg)

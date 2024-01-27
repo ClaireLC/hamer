@@ -1,5 +1,6 @@
 import torch
 from typing import Any
+import os
 
 from .renderer import Renderer
 from .mesh_renderer import MeshRenderer
@@ -23,3 +24,18 @@ def recursive_to(x: Any, target: torch.device):
         return [recursive_to(i, target) for i in x]
     else:
         return x
+
+def get_parent_folder_of_package(package_name):
+    # Import the package
+    package = __import__(package_name)
+
+    # Get the absolute path of the imported package
+    package_path = os.path.abspath(package.__file__)
+
+    # Get the directory of the package
+    package_dir = os.path.dirname(package_path)
+
+    # Get the parent directory
+    parent_dir = os.path.dirname(package_dir)
+
+    return parent_dir
