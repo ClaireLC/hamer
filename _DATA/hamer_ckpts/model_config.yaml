@@ -56,7 +56,10 @@ MANO:
   MEAN_PARAMS: data/mano_mean_params.npz
   CREATE_BODY_POSE: false
 EXTRA:
-  FOCAL_LENGTH: 5000
+  # FOCAL_LENGTH: 5000
+  # NOTE: hard-coded focal length for 256x256 images
+  FOCAL_LENGTH: 122  # making scaled_focal_length = 1055 (true ZED focal length)
+
   NUM_LOG_IMAGES: 4
   NUM_LOG_SAMPLES_PER_IMAGE: 8
   PELVIS_IND: 0
