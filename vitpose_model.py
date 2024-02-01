@@ -8,10 +8,16 @@ import torch.nn as nn
 
 from mmpose.apis import inference_top_down_pose_model, init_pose_model, process_mmdet_results, vis_pose_result
 
+from hamer.utils import get_parent_folder_of_package
+
+
 os.environ["PYOPENGL_PLATFORM"] = "egl"
 
 # project root directory
-ROOT_DIR = "/juno/u/clairech/hamer"
+ROOT_DIR = get_parent_folder_of_package('hamer')    # auto detect the root directory of the project
+print(">>> Loading ViTPose...")
+print(f'ROOT_DIR: {ROOT_DIR}')
+
 VIT_DIR = os.path.join(ROOT_DIR, "third-party/ViTPose")
 
 class ViTPoseModel(object):

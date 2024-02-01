@@ -2,7 +2,10 @@ import os
 from typing import Dict
 from yacs.config import CfgNode as CN
 
-CACHE_DIR_HAMER = "./_DATA"
+from hamer.utils import get_parent_folder_of_package
+
+ROOT_DIR = get_parent_folder_of_package('hamer')    # auto detect the root directory of the project
+CACHE_DIR_HAMER = os.path.join(ROOT_DIR, "_DATA")
 
 def to_lower(x: Dict) -> Dict:
     """
